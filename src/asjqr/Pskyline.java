@@ -24,8 +24,9 @@ import java.util.Map.Entry;
  */
 public class Pskyline
 {
-	HashMap<Integer,Double>HM = new HashMap<Integer,Double>();
-	double T;
+	public static HashMap<Integer,Double>HMtemp = new HashMap<Integer,Double>();
+	public static HashMap<Integer,Boolean>HM = new HashMap<Integer,Boolean>();
+	
 	String sortOnEntropy(String inputFile, int attr[], int pref[]) throws IOException, InterruptedException, FileNotFoundException, IOException
 	{
 		String inputTemp=Misc.getFileName(Misc.temps);
@@ -87,120 +88,6 @@ public class Pskyline
 //		preorder( r.getl() );
 //		preorder( r.getr() );
 //	}
-	String processSkyline(Query query,String inputfile, String base, int attr[], int pref[], double p, int flag) throws IOException, InterruptedException
-	{
-		inputfile=sortOnEntropy(inputfile,attr,pref);
-		System.out.println("Entropy File: " + inputfile);
-		if(!base.isEmpty()) base=sortOnEntropy(base,attr,pref);
-		String str;
-		String baseRec;
-		BufferedReader br1=new BufferedReader(new FileReader(inputfile));
-		BufferedReader br2;
-		String outputfile;
-		if(flag==1) outputfile=Misc.getFileName(Misc.outputs);
-		else outputfile=Misc.getFileName(Misc.temps);
-		BufferedWriter bw=new BufferedWriter(new FileWriter(outputfile));
-		int code=0;
-		double entropy,tempProb1,tempProb2,tempProb=1;
-		while((str=br1.readLine())!=null)
-		{
-			//System.out.println("Row1: " + str);
-			String [] entryStr=str.split(" ");
-			int l1 = entryStr.length;
-			//Create Root Node
-			int tupleNoX = (int)Double.parseDouble(entryStr[query.rel[0].iattr]);
-			tempProb1 = Double.parseDouble(entryStr[query.rel[0].pattr]);
-			//Added - ChirayuKM 
-			int id1 = (int)Double.parseDouble(entryStr[query.rel[0].id]);
-			//End
-			//Updated - ChirayuKM 
-			TreeNode root1 = new TreeNode(id1,tupleNoX, tempProb1, true);
-			//End
-
-			int tupleNoY = (int)Double.parseDouble(entryStr[query.rel[1].iattr + query.rel[0].numattr]);
-			tempProb2 = Double.parseDouble(entryStr[query.rel[1].pattr + query.rel[0].numattr]);
-			//Added - ChirayuKM
-			int id2 = (int)Double.parseDouble(entryStr[query.rel[1].id + query.rel[0].numattr]);
-			//End
-			//Updated - ChirayuKM
-			TreeNode root2 = new TreeNode(id2,tupleNoY, tempProb2, true);
-			//End
-
-			root1.addLeft(root2);
-			tempProb = tempProb1*tempProb2;
-		//	System.out.println(id1+","+id2+","+tupleNoX+","+tupleNoY+","+tempProb+" is dominated by :");
-			entropy = Double.parseDouble(entryStr[l1-1]);
-			if((tempProb1*tempProb2) > p){	
-				if(!base.isEmpty())
-					br2=new BufferedReader(new FileReader(base));				
-				else
-					br2=new BufferedReader(new FileReader(inputfile));
-				while((baseRec=br2.readLine())!=null)
-				{
-					String [] entryRec=baseRec.split(" ");
-					//Added - ChirayuKM
-					if((int)Double.parseDouble(entryRec[query.rel[0].iattr])==(int)Double.parseDouble(entryStr[query.rel[0].iattr]) && (int)Double.parseDouble(entryRec[query.rel[1].iattr + query.rel[0].numattr]) == (int)Double.parseDouble(entryStr[query.rel[1].iattr + query.rel[0].numattr]))continue;
-					if((int)Double.parseDouble(entryRec[query.rel[0].iattr])==(int)Double.parseDouble(entryStr[query.rel[0].iattr]) && (int)Double.parseDouble(entryRec[query.rel[0].id])!=(int)Double.parseDouble(entryStr[query.rel[0].id]))continue;
-					if((int)Double.parseDouble(entryRec[query.rel[1].iattr + query.rel[0].numattr]) == (int)Double.parseDouble(entryStr[query.rel[1].iattr + query.rel[0].numattr]) && (int)Double.parseDouble(entryRec[query.rel[1].id + query.rel[0].numattr]) != (int)Double.parseDouble(entryStr[query.rel[1].id + query.rel[0].numattr]))continue;
-					//End
-					if(entropy < Double.parseDouble(entryRec[entryRec.length-1])) break; //record cannot dominate str
-					code=dominates(str,baseRec,attr,pref); // 1 : str dominates record 2: record dominates str 3: neither dominates each other
-					if (code==2)
-					{
-						//to do only need to make change here, add to tree and calc tempProb
-						//Added - ChirayuKM
-						HashMap<Integer, ArrayList<CheckNode>> hm = new HashMap<Integer, ArrayList<CheckNode>>();
-						//End
-						String entryStr1[] =baseRec.split(" ");
-						l1 = entryStr1.length;
-						tupleNoX = (int)Double.parseDouble(entryStr1[query.rel[0].iattr]);
-						tempProb1 = Double.parseDouble(entryStr1[query.rel[0].pattr]);
-						//Added - ChirayuKM
-						id1=(int)Double.parseDouble(entryStr1[query.rel[0].id]);
-						//End
-						tupleNoY = (int)Double.parseDouble(entryStr1[query.rel[1].iattr + query.rel[0].numattr]);
-						tempProb2 = Double.parseDouble(entryStr1[query.rel[1].pattr + query.rel[0].numattr]);
-						//Added - ChirayuKM
-						id2=(int)Double.parseDouble(entryStr1[query.rel[1].id + query.rel[0].numattr]);
-						//End
-						//System.out.println(tupleNoX+","+tupleNoY+","+tempProb1*tempProb2);
-						//Chirayu Updated
-						root1.addJoinedTupleToTree(id1,id2,tupleNoX,tupleNoY,tempProb1,tempProb2);
-						//System.out.println(id1+","+id2+","+tupleNoX+","+tupleNoY+","+tempProb1+","+tempProb2);
-						//inorder(root1);
-						//System.out.println();
-						//preorder(root1);
-						//System.out.println();
-						//End
-						Misc.probGlobal = 0;
-						//root1.computeSkylineProbability(1);
-						
-						//Added - ChirayuKM
-						root1.computeSkylineProbability(hm);
-						//End
-						tempProb = Misc.probGlobal;
-						//tempProb = tempProb*(1-Double.parseDouble(entryRec[entryRec.length-2]));
-						if(tempProb <= p)
-						break;
-					}
-				}
-				br2.close();
-				//System.out.println("Prob: "+tempProb);
-			}
-			if(tempProb > p){
-				String newStr="";
-				for(int i=0; i<l1-1; i++){
-					newStr=newStr+entryStr[i]+" ";
-				}	
-				newStr=newStr+tempProb+"\n";
-				bw.write(newStr);
-			}
-		}
-		bw.flush();
-		bw.close();
-		br1.close();
-		return outputfile;
-	}
 	
 	//Added by Chirayu
 	
@@ -255,10 +142,9 @@ public class Pskyline
 					if (code==2)
 					{
 						String entryStr1[] =baseRec.split(" ");
-						l1 = entryStr1.length;
+						//l1 = entryStr1.length;
 						int tupleNoY = (int)Double.parseDouble(entryStr1[query.rel[0].iattr]);
 						tempProb2 = Double.parseDouble(entryStr1[query.rel[0].pattr]);
-						
 						if(h.containsKey(tupleNoY))
 							h.put(tupleNoY,h.get(tupleNoY)+tempProb2);
 						else
@@ -266,7 +152,7 @@ public class Pskyline
 					}
 				}
 				
-				T = tempProb1;
+				double T = tempProb1;
 				for (Entry<Integer, Double> entry : h.entrySet())
 				{
 					if(entry.getValue().intValue()==1)
@@ -282,17 +168,28 @@ public class Pskyline
 							temp.add(id1);
 							hm.put(tupleNoX,temp);
 						}
-						break;
 					}
 					else
-						T=T*(1-tempProb2);			
+						T=T*(1-entry.getValue());
 				}
 				
-				
-				
+				if(HMtemp.containsKey(tupleNoX))
+					HMtemp.put(tupleNoX,HMtemp.get(tupleNoX)+T);
+				else
+					HMtemp.put(tupleNoX,T);	
 				
 				br2.close();
 		}
+		
+		for (Entry<Integer, Double> entry : HMtemp.entrySet())
+		{
+			if(entry.getValue()<p)
+			{
+				//System.out.println("key : "+entry.getKey());
+				HM.put(entry.getKey(),true);
+			}
+		}
+		
 		br1.close();
 //		
 //		for ( Integer key : hm.keySet() ) {
@@ -305,6 +202,125 @@ public class Pskyline
 		return hm;
 	}
 	//End
+	
+	String processSkyline(Query query,String inputfile, String base, int attr[], int pref[], double p, int flag) throws IOException, InterruptedException
+	{
+		
+		inputfile=sortOnEntropy(inputfile,attr,pref);
+		System.out.println("Entropy File : " + inputfile);
+		if(!base.isEmpty()) base=sortOnEntropy(base,attr,pref);
+		String str;
+		String baseRec;
+		BufferedReader br1=new BufferedReader(new FileReader(inputfile));
+		BufferedReader br2;
+		String outputfile;
+		if(flag==1) outputfile=Misc.getFileName(Misc.outputs);
+		else outputfile=Misc.getFileName(Misc.temps);
+		BufferedWriter bw=new BufferedWriter(new FileWriter(outputfile));
+		int code=0;
+
+		double entropy,tempProb1,tempProb2,tempProb=1;
+		while((str=br1.readLine())!=null)
+		{
+			//System.out.println("Row1: " + str);
+			String [] entryStr=str.split(" ");
+			int l1 = entryStr.length;
+			//Create Root Node
+			int tupleNoX = (int)Double.parseDouble(entryStr[query.rel[0].iattr]);
+			tempProb1 = Double.parseDouble(entryStr[query.rel[0].pattr]);
+			//Added - ChirayuKM 
+			int id1 = (int)Double.parseDouble(entryStr[query.rel[0].id]);
+			//End
+			//Updated - ChirayuKM 
+			TreeNode root1 = new TreeNode(id1,tupleNoX, tempProb1, true);
+			//End
+
+			int tupleNoY = (int)Double.parseDouble(entryStr[query.rel[1].iattr + query.rel[0].numattr]);
+			tempProb2 = Double.parseDouble(entryStr[query.rel[1].pattr + query.rel[0].numattr]);
+			//Added - ChirayuKM
+			int id2 = (int)Double.parseDouble(entryStr[query.rel[1].id + query.rel[0].numattr]);
+			
+			if(HM.containsKey(tupleNoX)||HM.containsKey(tupleNoY))
+				continue;
+			//End
+			//Updated - ChirayuKM
+			TreeNode root2 = new TreeNode(id2,tupleNoY, tempProb2, true);
+			//End
+
+			root1.addLeft(root2);
+			tempProb = tempProb1*tempProb2;
+		//	System.out.println(id1+","+id2+","+tupleNoX+","+tupleNoY+","+tempProb+" is dominated by :");
+			entropy = Double.parseDouble(entryStr[l1-1]);
+			if((tempProb1*tempProb2) > p){	
+				if(!base.isEmpty())
+					br2=new BufferedReader(new FileReader(base));				
+				else
+					br2=new BufferedReader(new FileReader(inputfile));
+				while((baseRec=br2.readLine())!=null)
+				{
+					String [] entryRec=baseRec.split(" ");
+					//Added - ChirayuKM
+					if((int)Double.parseDouble(entryRec[query.rel[0].iattr])==(int)Double.parseDouble(entryStr[query.rel[0].iattr]) && (int)Double.parseDouble(entryRec[query.rel[1].iattr + query.rel[0].numattr]) == (int)Double.parseDouble(entryStr[query.rel[1].iattr + query.rel[0].numattr]))continue;
+					if((int)Double.parseDouble(entryRec[query.rel[0].iattr])==(int)Double.parseDouble(entryStr[query.rel[0].iattr]) && (int)Double.parseDouble(entryRec[query.rel[0].id])!=(int)Double.parseDouble(entryStr[query.rel[0].id]))continue;
+					if((int)Double.parseDouble(entryRec[query.rel[1].iattr + query.rel[0].numattr]) == (int)Double.parseDouble(entryStr[query.rel[1].iattr + query.rel[0].numattr]) && (int)Double.parseDouble(entryRec[query.rel[1].id + query.rel[0].numattr]) != (int)Double.parseDouble(entryStr[query.rel[1].id + query.rel[0].numattr]))continue;
+					//End
+					if(entropy < Double.parseDouble(entryRec[entryRec.length-1])) break; //record cannot dominate str
+					code=dominates(str,baseRec,attr,pref); // 1 : str dominates record 2: record dominates str 3: neither dominates each other
+					if (code==2)
+					{
+						//to do only need to make change here, add to tree and calc tempProb
+						//Added - ChirayuKM
+						HashMap<Integer, ArrayList<CheckNode>> hm = new HashMap<Integer, ArrayList<CheckNode>>();
+						//End
+						String entryStr1[] =baseRec.split(" ");
+						l1 = entryStr1.length;
+						tupleNoX = (int)Double.parseDouble(entryStr1[query.rel[0].iattr]);
+						tempProb1 = Double.parseDouble(entryStr1[query.rel[0].pattr]);
+						//Added - ChirayuKM
+						id1=(int)Double.parseDouble(entryStr1[query.rel[0].id]);
+						//End
+						tupleNoY = (int)Double.parseDouble(entryStr1[query.rel[1].iattr + query.rel[0].numattr]);
+						tempProb2 = Double.parseDouble(entryStr1[query.rel[1].pattr + query.rel[0].numattr]);
+						//Added - ChirayuKM
+						id2=(int)Double.parseDouble(entryStr1[query.rel[1].id + query.rel[0].numattr]);
+						//End
+						//Chirayu Updated
+						root1.addJoinedTupleToTree(id1,id2,tupleNoX,tupleNoY,tempProb1,tempProb2);
+						//System.out.println(id1+","+id2+","+tupleNoX+","+tupleNoY+","+tempProb1+","+tempProb2);
+						//inorder(root1);
+						//System.out.println();
+						//preorder(root1);
+						//System.out.println();
+						//End
+						Misc.probGlobal = 0;
+						//root1.computeSkylineProbability(1);
+						
+						//Added - ChirayuKM
+						root1.computeSkylineProbability(hm);
+						//End
+						tempProb = Misc.probGlobal;
+						//tempProb = tempProb*(1-Double.parseDouble(entryRec[entryRec.length-2]));
+						//if(tempProb <= p)
+						//break;
+					}
+				}
+				br2.close();
+				//System.out.println("Prob: "+tempProb);
+			}
+			//if(tempProb > p){
+				String newStr="";
+				for(int i=0; i<l1-1; i++){
+					newStr=newStr+entryStr[i]+" ";
+				}	
+				newStr=newStr+tempProb+"\n";
+				bw.write(newStr);
+			//}
+		}
+		bw.flush();
+		bw.close();
+		br1.close();
+		return outputfile;
+	}
 	int dominates(String str,String record,int attr[],int pref[])
 	{
 		StringTokenizer st1=new StringTokenizer(str," ");
