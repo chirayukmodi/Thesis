@@ -5,7 +5,11 @@
 
 package asjqr;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,6 +120,7 @@ class Pasjq
 	{
 		Skyline sk=new Skyline();
 		Pskyline psk=new Pskyline();
+		HashMap<Integer,HashMap<Integer,Double>>OutputMap = new HashMap<Integer, HashMap<Integer, Double>>();
 		String tempre[][]=new String[query.n][2];
 		String temprel[][]=new String[query.n][3];
 		for(int i=0;i<query.n;i++)
@@ -154,6 +159,26 @@ class Pasjq
 
 		String join1=agg.doUnion(asj1,asj2,asj3);													//J1 ← T 1 ∪ T 2 ∪ T 3
 		String sky1[] = agg.threshAggregate(query,join1,query.rel[0].gattr,gattr,query.gop,true); //(S1, R1) ← ThreshAggregate(J1, p)
+		
+		//Added By Chirayu
+		BufferedReader br=new BufferedReader(new FileReader(sky1[0]));
+		String temp;
+		while((temp=br.readLine())!=null)
+		{
+			String FullSkyline[] = temp.split(" ");
+			//System.out.println(temp);
+			Double prob1,prob2;
+			prob1 = Double.parseDouble(FullSkyline[query.rel[0].pattr]);
+			prob2 = Double.parseDouble(FullSkyline[query.rel[1].pattr+query.rel[0].numattr]);
+			if(query.p >= prob1 && query.p>=prob2)
+			{
+				HashMap<Integer,Double>tempMap = new HashMap<Integer,Double>();
+				tempMap.put((int)Double.parseDouble(FullSkyline[query.rel[1].iattr + query.rel[0].numattr]), prob1*prob2);
+				OutputMap.put((int)Double.parseDouble(FullSkyline[query.rel[0].iattr]), tempMap);
+			}
+		}
+		br.close();
+		//End
 		String result2 = agg.doAggregate(asj5,query.rel[0].gattr,gattr,query.gop);				//R2 ← Aggregate(T 5)
 		String join2=agg.doUnion(asj1,asj2,asj5);												//T ← Aggregate(T 1 ∪ T 2 ∪ T 5)
 		String target = agg.doAggregate(join2,query.rel[0].gattr,gattr,query.gop);
@@ -417,6 +442,4 @@ class Pasjq
 		agg.executeShellCommand("cat "+files+" > "+asjq);
 		return asjq;
 	}
-
-	//Added by Chirayu
 	}

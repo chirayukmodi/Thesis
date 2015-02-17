@@ -31,6 +31,7 @@ class Query
 	RelationProps rel[]; // properties of each relation, size: no. of relations
 	int jop[]; // join operation, size: no. of join operations, 0 = ; 1 < ; 2 > ; 3 <= ; 4 >= ; 5 !=
 	int gop[]; // aggregate operation, size: no. of aggregate operations, 0 + ; 1 max ; 2 avg ; 3 min
+	
 }
 class RelationProps
 {
