@@ -6,10 +6,8 @@
 package asjqr;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +60,7 @@ class Pasjq
 		Pskyline sk=new Pskyline();
 		int attr[],pref[];
 		//Added by Chirayu
+		HashMap<Integer,HashMap<Integer,Double>>OutPutMap = new HashMap<Integer, HashMap<Integer, Double>>();
 		PruneInput(query);
 		//End
 		//Skyline sk = new Skyline();
@@ -70,8 +69,8 @@ class Pasjq
 		//String j=join.doJoin(query.rel[0].name, query.rel[1].name, query.rel[0].jattr,query.rel[1].jattr,query.jop);
 		//End
 		
+		
 		String j=join.doJoin(query.rel[0].name, query.rel[1].name, query.rel[0].jattr,query.rel[1].jattr,query.jop,H);
-	
 		System.out.println("Join File: " + j);
 
 		int gattr[]=new int[query.rel[1].gattr.length];
@@ -110,7 +109,7 @@ class Pasjq
 			System.out.println("("+attr[i] +","+pref[i]+")");
 		}
 		//String pasjq="";
-		String pasjq=sk.processSkyline(query,aj,"",attr,pref,query.p,1);
+		String pasjq=sk.processSkyline(query,aj,"",attr,pref,query.p,1,OutPutMap);
 		//sk.processSkyline(query,aj,"",attr,pref,query.p,1);
 		//String asjq[] = {"success"};*/
 		return pasjq;
@@ -120,7 +119,9 @@ class Pasjq
 	{
 		Skyline sk=new Skyline();
 		Pskyline psk=new Pskyline();
+		//Added By Chirayu
 		HashMap<Integer,HashMap<Integer,Double>>OutputMap = new HashMap<Integer, HashMap<Integer, Double>>();
+		//End
 		String tempre[][]=new String[query.n][2];
 		String temprel[][]=new String[query.n][3];
 		for(int i=0;i<query.n;i++)
@@ -205,17 +206,17 @@ class Pasjq
 			}    
 			System.out.println("("+attr[i] +","+pref[i]+")");
 		}
-		String sky2=psk.processSkyline(query,result2,target,attr,pref,query.p,0);		//S2 ← ComputeSkylineUsingTargetSets(R2, T, p)
+		String sky2=psk.processSkyline(query,result2,target,attr,pref,query.p,0,OutputMap);		//S2 ← ComputeSkylineUsingTargetSets(R2, T, p)
 
 		String result3 = agg.doAggregate(asj7,query.rel[0].gattr,gattr,query.gop);	//R3 ← Aggregate(T 7)
 		String join3=agg.doUnion(asj1,asj3,asj7);									//T ← Aggregate(T 1 ∪ T 3 ∪ T 7)
 		target = agg.doAggregate(join3,query.rel[0].gattr,gattr,query.gop);
-		String sky3=psk.processSkyline(query,result3,target,attr,pref,query.p,0); 	//S3 ← ComputeSkylineUsingTargetSets(R3, T, p)
+		String sky3=psk.processSkyline(query,result3,target,attr,pref,query.p,0,OutputMap); 	//S3 ← ComputeSkylineUsingTargetSets(R3, T, p)
 
 		String join4=agg.doUnion(asj4,asj6,asj8,asj9);									//J4 ← T 4 ∪ T 6 ∪ T 8 ∪ T 9
 		String result4 = agg.doAggregate(join4,query.rel[0].gattr,gattr,query.gop); 	//R4 ← Aggregate(J4)
 		target = agg.doUnion(sky1[1],result2,result3,result4);							// T ← R1 ∪ R2 ∪ R3 ∪ R4 
-		String sky4 = psk.processSkyline(query,result4,target,attr,pref,query.p,0);		// S4 ← ComputeSkylineUsingTargetSets(R4, T, p)
+		String sky4 = psk.processSkyline(query,result4,target,attr,pref,query.p,0,OutputMap);		// S4 ← ComputeSkylineUsingTargetSets(R4, T, p)
 		String sky = agg.doUnion(sky1[0],sky2,sky3,sky4);								// S ← S1 ∪ S2 ∪ S3 ∪ S4
 		return sky;
 	}
@@ -338,6 +339,9 @@ class Pasjq
 	{
 		Skyline sk=new Skyline();
 		Pskyline psk = new Pskyline();
+		//Added By Chirayu
+		HashMap<Integer,HashMap<Integer,Double>>OutPutMap = new HashMap<Integer, HashMap<Integer, Double>>();
+		//End
 		String temprel[][]=new String[query.n][2];
 		String tempre[][]=new String[query.n][2];
 		String nonFull[]=new String[query.n];
@@ -431,7 +435,7 @@ class Pasjq
 				{
 					String base = join.doJoin(rela[0][i], rela[1][j], query.rel[0].jattr,query.rel[1].jattr,query.jop);
 					base = agg.doAggregate(base, query.rel[0].gattr,gattr,query.gop);
-					skyjoin[i][j]=psk.processSkyline(query, pasjq[0], base, attr, pref, query.p,0);
+					skyjoin[i][j]=psk.processSkyline(query, pasjq[0], base, attr, pref, query.p,0,OutPutMap);
 				}                
 			}
 		}

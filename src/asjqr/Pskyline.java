@@ -205,7 +205,7 @@ public class Pskyline
 	}
 	//End
 	
-	String processSkyline(Query query,String inputfile, String base, int attr[], int pref[], double p, int flag) throws IOException, InterruptedException
+	String processSkyline(Query query,String inputfile, String base, int attr[], int pref[], double p, int flag,HashMap<Integer,HashMap<Integer,Double>>OpMap) throws IOException, InterruptedException
 	{
 		inputfile=sortOnEntropy(inputfile,attr,pref);
 		System.out.println("Entropy File : " + inputfile);
@@ -241,6 +241,8 @@ public class Pskyline
 			//Added - ChirayuKM
 			int id2 = (int)Double.parseDouble(entryStr[query.rel[1].id + query.rel[0].numattr]);
 			
+			if(OpMap.containsKey(tupleNoX) && OpMap.get(tupleNoX).containsKey(tupleNoY) && OpMap.get(tupleNoX).get(tupleNoY)>=query.p)
+				continue;
 			if(HM.containsKey(tupleNoX)||HM.containsKey(tupleNoY))
 				continue;
 			//End
@@ -277,6 +279,7 @@ public class Pskyline
 					if(!flg)
 						continue;
 					//End
+					
 					if(entropy < Double.parseDouble(entryRec[entryRec.length-1])) break; //record cannot dominate str
 					code=dominates(str,baseRec,attr,pref); // 1 : str dominates record 2: record dominates str 3: neither dominates each other
 					if (code==2)
@@ -287,18 +290,18 @@ public class Pskyline
 						//End
 						String entryStr1[] =baseRec.split(" ");
 						l1 = entryStr1.length;
-						tupleNoX = (int)Double.parseDouble(entryStr1[query.rel[0].iattr]);
-						tempProb1 = Double.parseDouble(entryStr1[query.rel[0].pattr]);
+						int domtupleNoX = (int)Double.parseDouble(entryStr1[query.rel[0].iattr]);
+						double domtempProb1 = Double.parseDouble(entryStr1[query.rel[0].pattr]);
 						//Added - ChirayuKM
-						id1=(int)Double.parseDouble(entryStr1[query.rel[0].id]);
+						int domid1=(int)Double.parseDouble(entryStr1[query.rel[0].id]);
 						//End
-						tupleNoY = (int)Double.parseDouble(entryStr1[query.rel[1].iattr + query.rel[0].numattr]);
-						tempProb2 = Double.parseDouble(entryStr1[query.rel[1].pattr + query.rel[0].numattr]);
+						int domtupleNoY = (int)Double.parseDouble(entryStr1[query.rel[1].iattr + query.rel[0].numattr]);
+						double domtempProb2 = Double.parseDouble(entryStr1[query.rel[1].pattr + query.rel[0].numattr]);
 						//Added - ChirayuKM
-						id2=(int)Double.parseDouble(entryStr1[query.rel[1].id + query.rel[0].numattr]);
+						int domid2=(int)Double.parseDouble(entryStr1[query.rel[1].id + query.rel[0].numattr]);
 						//End
 						//Chirayu Updated
-						root1.addJoinedTupleToTree(id1,id2,tupleNoX,tupleNoY,tempProb1,tempProb2);
+						root1.addJoinedTupleToTree(domid1,domid2,domtupleNoX,domtupleNoY,domtempProb1,domtempProb2);
 						//System.out.println(id1+","+id2+","+tupleNoX+","+tupleNoY+","+tempProb1+","+tempProb2);
 						//inorder(root1);
 						//System.out.println();
@@ -321,6 +324,21 @@ public class Pskyline
 				//System.out.println("Prob: "+tempProb);
 			//}
 			//if(tempProb > p){
+				
+				if(OpMap.containsKey(tupleNoX) && OpMap.get(tupleNoX).containsKey(tupleNoY))
+				{
+					HashMap<Integer,Double>tempMap = new HashMap<Integer,Double>();
+					tempMap.put(tupleNoY,OpMap.get(tupleNoX).get(tupleNoY)+tempProb);
+					OpMap.put(tupleNoX,tempMap);
+				}
+				else if(OpMap.containsKey(tupleNoX))
+					OpMap.get(tupleNoX).put(tupleNoY, tempProb);
+				else
+				{
+					HashMap<Integer,Double>tempMap = new HashMap<Integer,Double>();
+					tempMap.put(tupleNoY,tempProb);
+					OpMap.put(tupleNoX,tempMap);
+				}
 				String newStr="";
 				for(int i=0; i<l1-1; i++){
 					newStr=newStr+entryStr[i]+" ";
@@ -512,9 +530,6 @@ public class Pskyline
 		return outputfile;
 	}
 
-	
-	
-	
 	
 	//implement for string instead of input file
 	public void processSkylineForTuple(Query query, String input, String base,
