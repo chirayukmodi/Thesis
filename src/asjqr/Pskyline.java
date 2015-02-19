@@ -247,7 +247,7 @@ public class Pskyline
 				continue;
 			//End
 			//Updated - ChirayuKM
-			TreeNode root2 = new TreeNode(id2,tupleNoY, tempProb2, true);
+			TreeNode root2 = new TreeNode(id2,tupleNoY,tempProb2, true);
 			//End
 
 			root1.addLeft(root2);

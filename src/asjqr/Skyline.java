@@ -79,7 +79,7 @@ public class Skyline
         Misc.executeShellCommand("rm "+newnode+".sort "+curnode+".sort");
         return outputfile;
     }
-    String[] processSkyline(String inputfile, String base, int attr[], int pref[]) throws IOException, InterruptedException
+    String[] processSkyline(Query query,String inputfile, String base, int attr[], int pref[]) throws IOException, InterruptedException
     {
         String sortedBase="";
         String truncInput=Misc.getFileName(Misc.temps);
@@ -90,10 +90,10 @@ public class Skyline
             truncInput=removeData(inputfile, base);
         }
         String sortedInput=sortOnEntropy(truncInput,attr,pref); //entropy = log of multiplication of all attributes and then sort all rows based on it 
-        String outputfile[]=findSkyline(sortedInput,sortedBase,attr,pref); // read input from sorted input file and write skyline rows to outputfile[0] and non skyline rows to outputfile[1]..*/
+        String outputfile[]=findSkyline(query,sortedInput,sortedBase,attr,pref); // read input from sorted input file and write skyline rows to outputfile[0] and non skyline rows to outputfile[1]..*/
         return outputfile;
     }
-    String[] findSkyline(String inputfile, String base, int attr[],int pref[]) throws IOException
+    String[] findSkyline(Query query,String inputfile, String base, int attr[],int pref[]) throws IOException
     {
         BufferedReader br=new BufferedReader(new FileReader(inputfile));
         String outputfile[]=new String[2];
@@ -125,10 +125,21 @@ public class Skyline
         {
             while((str=br.readLine())!=null)
             {
+            	//Added By Chirayu
+            	String temp[]=str.split(" ");
+            	int tupleNo1 = (int)Double.parseDouble(temp[query.rel[0].iattr]);
+            	//End
                 int code=0;
                 for(int i=0;i<window.size();i++)
                 {
                     String record=window.elementAt(i);
+                    //Added By Chirayu
+                    temp = record.split(" ");
+                    int tupleNo2 = (int)Double.parseDouble(temp[query.rel[0].iattr]);
+                    
+                    if(tupleNo1==tupleNo2)
+                    	continue;
+                    //End
                     code=dominates(str,record,attr,pref); // 1 : str dominates record 2: record dominates str 3: neither dominates each other
                     if(code==3)
                         continue;

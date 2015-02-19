@@ -26,31 +26,31 @@ class Pasjq
 	//Added by Chirayu
 	void PruneInput(Query query) throws FileNotFoundException, IOException, InterruptedException
 	{
-		Pskyline sk=new Pskyline();
+		Pskyline psk=new Pskyline();
 		for(int i=0;i<query.n;i++)
 		{
 			int attr[]=new int[query.rel[i].nl+query.gop.length];
 			int pref[]=new int[query.rel[i].nl+query.gop.length];
-			
-				int j=0;
-				for(int k=0;k<query.rel[i].nl;k++)
-				{
-					attr[j]=query.rel[i].lattr[k];
-					pref[j]=query.rel[i].lpref[k];
-					j++;
-				}
-				for(int k=0;k<query.gop.length;k++)
-				{
-					attr[j]=query.rel[i].gattr[k];
-					pref[j]=query.rel[i].gpref[k];
-					j++;
-				}
-				
-				
-				Htemp = sk.processSkyline_SingleRelation(query,query.rel[i].name, "", attr, pref, query.p, 1);
-				H.putAll(Htemp);
+
+			int j=0;
+			for(int k=0;k<query.rel[i].nl;k++)
+			{
+				attr[j]=query.rel[i].lattr[k];
+				pref[j]=query.rel[i].lpref[k];
+				j++;
+			}
+			for(int k=0;k<query.gop.length;k++)
+			{
+				attr[j]=query.rel[i].gattr[k];
+				pref[j]=query.rel[i].gpref[k];
+				j++;
+			}
+
+
+			Htemp = psk.processSkyline_SingleRelation(query,query.rel[i].name, "", attr, pref, query.p, 1);
+			H.putAll(Htemp);
 		}
-		
+
 	}
 	//End
 
@@ -64,12 +64,12 @@ class Pasjq
 		PruneInput(query);
 		//End
 		//Skyline sk = new Skyline();
-		
+
 		//Commented by Chirayu
 		//String j=join.doJoin(query.rel[0].name, query.rel[1].name, query.rel[0].jattr,query.rel[1].jattr,query.jop);
 		//End
-		
-		
+
+
 		String j=join.doJoin(query.rel[0].name, query.rel[1].name, query.rel[0].jattr,query.rel[1].jattr,query.jop,H);
 		System.out.println("Join File: " + j);
 
@@ -119,6 +119,7 @@ class Pasjq
 	{
 		Skyline sk=new Skyline();
 		Pskyline psk=new Pskyline();
+		PruneInput(query);
 		//Added By Chirayu
 		HashMap<Integer,HashMap<Integer,Double>>OutputMap = new HashMap<Integer, HashMap<Integer, Double>>();
 		//End
@@ -135,32 +136,34 @@ class Pasjq
 					attr[j]=j;
 					pref[j]=query.rel[i].attr[j].pref;
 				}
-				tempre[i]=sk.processSkyline(query.rel[i].name,"",attr,pref); //Af, Af'
+				tempre[i]=sk.processSkyline(query,query.rel[i].name,"",attr,pref); //Af, Af'
 				temprel[i][2]=tempre[i][1]; //stores Af'
 			}
-			tempre[i]=sk.processSkyline(tempre[i][0],"",query.rel[i].lattr,query.rel[i].lpref);
+			tempre[i]=sk.processSkyline(query,tempre[i][0],"",query.rel[i].lattr,query.rel[i].lpref);
 			temprel[i][0]=tempre[i][0]; //Afl
 			temprel[i][1]=tempre[i][1]; //Afl'
 		}
 
 		// join all the subsets
-		String asj1=join.doJoin(temprel[0][0],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl X Bfl
-		String asj2=join.doJoin(temprel[0][0],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl X Bfl'
-		String asj3=join.doJoin(temprel[0][1],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl' X Bfl
-		String asj4=join.doJoin(temprel[0][1],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl' X Bfl'
-		String asj5=join.doJoin(temprel[0][0],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl X Bf'
-		String asj6=join.doJoin(temprel[0][1],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl' X Bf'
-		String asj7=join.doJoin(temprel[0][2],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Af' X Bfl
-		String asj8=join.doJoin(temprel[0][2],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Af' X Bfl'
-		String asj9=join.doJoin(temprel[0][2],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Af' X Bf'
-
+		//Updated by Chirayu
+		String asj1=join.doJoin(temprel[0][0],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl X Bfl
+		String asj2=join.doJoin(temprel[0][0],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl X Bfl'
+		String asj3=join.doJoin(temprel[0][1],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl' X Bfl
+		String asj4=join.doJoin(temprel[0][1],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl' X Bfl'
+		String asj5=join.doJoin(temprel[0][0],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl X Bf'
+		String asj6=join.doJoin(temprel[0][1],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl' X Bf'
+		String asj7=join.doJoin(temprel[0][2],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Af' X Bfl
+		String asj8=join.doJoin(temprel[0][2],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Af' X Bfl'
+		String asj9=join.doJoin(temprel[0][2],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Af' X Bf'
+		//End
+		
 		int gattr[]=new int[query.rel[1].gattr.length];
 		for(int i=0;i<gattr.length;i++)
 			gattr[i]=query.rel[1].gattr[i]+query.rel[0].numattr; //gattr[i]=query.rel[1].gattr[i]+query.rel[0].nl+query.rel[0].ng;
 
 		String join1=agg.doUnion(asj1,asj2,asj3);													//J1 ← T 1 ∪ T 2 ∪ T 3
 		String sky1[] = agg.threshAggregate(query,join1,query.rel[0].gattr,gattr,query.gop,true); //(S1, R1) ← ThreshAggregate(J1, p)
-		
+
 		//Added By Chirayu
 		BufferedReader br=new BufferedReader(new FileReader(sky1[0]));
 		String temp;
@@ -238,10 +241,10 @@ class Pasjq
 					attr[j]=j;
 					pref[j]=query.rel[i].attr[j].pref;
 				}
-				tempre[i]=sk.processSkyline(query.rel[i].name,"",attr,pref); //Af, Af'
+				tempre[i]=sk.processSkyline(query,query.rel[i].name,"",attr,pref); //Af, Af'
 				temprel[i][2]=tempre[i][1]; //stores Af'
 			}
-			tempre[i]=sk.processSkyline(tempre[i][0],"",query.rel[i].lattr,query.rel[i].lpref);
+			tempre[i]=sk.processSkyline(query,tempre[i][0],"",query.rel[i].lattr,query.rel[i].lpref);
 			temprel[i][0]=tempre[i][0]; //Afl
 			temprel[i][1]=tempre[i][1]; //Afl'
 		}
@@ -360,11 +363,11 @@ class Pasjq
 					attr[j]=j;
 					pref[j]=query.rel[i].attr[j].pref;
 				}
-				temprel[i]=sk.processSkyline(query.rel[i].name,"",attr,pref);
+				temprel[i]=sk.processSkyline(query,query.rel[i].name,"",attr,pref);
 				full[i] = temprel[i][0];  //storing Af
 				nonFull[i]= temprel[i][1]; //storing Af'
 			}
-			int THRESHOLD=2;
+			short THRESHOLD=2;
 			rel[i]=new Vector<String>();
 			boolean iter=false;int iteration=0;
 			do
@@ -373,12 +376,12 @@ class Pasjq
 				if(iter)
 					temprel[i][0]=temprel[i][1];
 				//String temp1=temprel[i][0];
-				temprel[i]=sk.processSkyline(temprel[i][0],"",query.rel[i].lattr,query.rel[i].lpref);
+				temprel[i]=sk.processSkyline(query,temprel[i][0],"",query.rel[i].lattr,query.rel[i].lpref);
 				rel[i].add(temprel[i][0]); //Afl and Afl'l
 				iter=true;
 			}while(iteration<THRESHOLD);
 			rel[i].add(temprel[i][1]); //Afl'l'
-			tempre[i]=sk.processSkyline(nonFull[i],"",query.rel[i].lattr,query.rel[i].lpref);
+			tempre[i]=sk.processSkyline(query,nonFull[i],"",query.rel[i].lattr,query.rel[i].lpref);
 			rel[i].add(tempre[i][0]); //Af'l
 			rel[i].add(tempre[i][1]); //Af'l'
 		}
@@ -446,4 +449,4 @@ class Pasjq
 		agg.executeShellCommand("cat "+files+" > "+asjq);
 		return asjq;
 	}
-	}
+}
