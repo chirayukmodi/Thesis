@@ -114,7 +114,6 @@ public class Pskyline
 			tempProb1 = Double.parseDouble(entryStr[query.rel[0].pattr]);
 			
 			HashMap<Integer,Double>h=new HashMap<Integer,Double>();
-			//System.out.println(id1+","+tupleNoX+","+tempProb1+"is dominated by :");
 			entropy = Double.parseDouble(entryStr[l1-1]);
 				if(!base.isEmpty())
 					br2=new BufferedReader(new FileReader(base));				
@@ -124,12 +123,11 @@ public class Pskyline
 				{
 					boolean flg = true;
 					String [] entryRec=baseRec.split(" ");
-					
 					if((int)Double.parseDouble(entryRec[query.rel[0].iattr])==(int)Double.parseDouble(entryStr[query.rel[0].iattr]))continue;
 					if(entropy < Double.parseDouble(entryRec[entryRec.length-1])) break; //record cannot dominate str
 					
 					
-					//Code for comparing join attributes
+					//Code for comparing join attributes - Added by Chirayu
 					for(int i=0;i<query.jop.length;i++)
 					{
 						if((int)Double.parseDouble(entryStr[query.rel[0].jattr[i]])!=(int)Double.parseDouble(entryRec[query.rel[0].jattr[i]]))
@@ -207,6 +205,7 @@ public class Pskyline
 	
 	String processSkyline(Query query,String inputfile, String base, int attr[], int pref[], double p, int flag,HashMap<Integer,HashMap<Integer,Double>>OpMap) throws IOException, InterruptedException
 	{
+		
 		inputfile=sortOnEntropy(inputfile,attr,pref);
 		System.out.println("Entropy File : " + inputfile);
 		if(!base.isEmpty()) base=sortOnEntropy(base,attr,pref);
@@ -240,7 +239,7 @@ public class Pskyline
 			tempProb2 = Double.parseDouble(entryStr[query.rel[1].pattr + query.rel[0].numattr]);
 			//Added - ChirayuKM
 			int id2 = (int)Double.parseDouble(entryStr[query.rel[1].id + query.rel[0].numattr]);
-			
+			System.out.println(id1+","+id2+","+tupleNoX+","+tupleNoY+ "is dominated by :");
 			if(OpMap.containsKey(tupleNoX) && OpMap.get(tupleNoX).containsKey(tupleNoY) && OpMap.get(tupleNoX).get(tupleNoY)>=query.p)
 				continue;
 			if(HM.containsKey(tupleNoX)||HM.containsKey(tupleNoY))
@@ -252,7 +251,6 @@ public class Pskyline
 
 			root1.addLeft(root2);
 			tempProb = tempProb1*tempProb2;
-		//	System.out.println(id1+","+id2+","+tupleNoX+","+tupleNoY+","+tempProb+" is dominated by :");
 			entropy = Double.parseDouble(entryStr[l1-1]);
 		//	if((tempProb1*tempProb2) > p){	
 				if(!base.isEmpty())
@@ -302,7 +300,7 @@ public class Pskyline
 						//End
 						//Chirayu Updated
 						root1.addJoinedTupleToTree(domid1,domid2,domtupleNoX,domtupleNoY,domtempProb1,domtempProb2);
-						//System.out.println(id1+","+id2+","+tupleNoX+","+tupleNoY+","+tempProb1+","+tempProb2);
+						System.out.println(domid1+","+domid2+","+domtupleNoX+","+domtupleNoY+","+domtempProb1+","+domtempProb2);
 						//inorder(root1);
 						//System.out.println();
 						//preorder(root1);

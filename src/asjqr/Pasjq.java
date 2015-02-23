@@ -119,8 +119,9 @@ class Pasjq
 	{
 		Skyline sk=new Skyline();
 		Pskyline psk=new Pskyline();
-		PruneInput(query);
 		//Added By Chirayu
+		PruneInput(query);
+
 		HashMap<Integer,HashMap<Integer,Double>>OutputMap = new HashMap<Integer, HashMap<Integer, Double>>();
 		//End
 		String tempre[][]=new String[query.n][2];
@@ -137,25 +138,48 @@ class Pasjq
 					pref[j]=query.rel[i].attr[j].pref;
 				}
 				tempre[i]=sk.processSkyline(query,query.rel[i].name,"",attr,pref); //Af, Af'
+				System.out.println("AF "+tempre[i][0]);
 				temprel[i][2]=tempre[i][1]; //stores Af'
+				System.out.println("AF'"+temprel[i][2]);
 			}
 			tempre[i]=sk.processSkyline(query,tempre[i][0],"",query.rel[i].lattr,query.rel[i].lpref);
-			temprel[i][0]=tempre[i][0]; //Afl
+			temprel[i][0]=tempre[i][0];//Afl	
+			System.out.println("AFL"+temprel[i][0]);
 			temprel[i][1]=tempre[i][1]; //Afl'
+			System.out.println("AFL'"+temprel[i][1]);
 		}
 
 		// join all the subsets
-		//Updated by Chirayu
+		//Added by Chirayu
 		String asj1=join.doJoin(temprel[0][0],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl X Bfl
+		System.out.println("asj1"+asj1);
 		String asj2=join.doJoin(temprel[0][0],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl X Bfl'
+		System.out.println("asj2"+asj2);
 		String asj3=join.doJoin(temprel[0][1],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl' X Bfl
+		System.out.println("asj3"+asj3);
 		String asj4=join.doJoin(temprel[0][1],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl' X Bfl'
+		System.out.println("asj4"+asj4);
 		String asj5=join.doJoin(temprel[0][0],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl X Bf'
+		System.out.println("asj5"+asj5);
 		String asj6=join.doJoin(temprel[0][1],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Afl' X Bf'
+		System.out.println("asj6"+asj6);
 		String asj7=join.doJoin(temprel[0][2],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Af' X Bfl
+		System.out.println("asj7"+asj7);
 		String asj8=join.doJoin(temprel[0][2],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Af' X Bfl'
+		System.out.println("asj8"+asj8);
 		String asj9=join.doJoin(temprel[0][2],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop,H); //Af' X Bf'
+		System.out.println("asj9"+asj8);
 		//End
+		
+//		String asj1=join.doJoin(temprel[0][0],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl X Bfl
+//		String asj2=join.doJoin(temprel[0][0],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl X Bfl'
+//		String asj3=join.doJoin(temprel[0][1],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl' X Bfl
+//		String asj4=join.doJoin(temprel[0][1],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl' X Bfl'
+//		String asj5=join.doJoin(temprel[0][0],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl X Bf'
+//		String asj6=join.doJoin(temprel[0][1],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Afl' X Bf'
+//		String asj7=join.doJoin(temprel[0][2],temprel[1][0],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Af' X Bfl
+//		String asj8=join.doJoin(temprel[0][2],temprel[1][1],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Af' X Bfl'
+//		String asj9=join.doJoin(temprel[0][2],temprel[1][2],query.rel[0].jattr,query.rel[1].jattr,query.jop); //Af' X Bf'
 		
 		int gattr[]=new int[query.rel[1].gattr.length];
 		for(int i=0;i<gattr.length;i++)
@@ -174,18 +198,27 @@ class Pasjq
 			Double prob1,prob2;
 			prob1 = Double.parseDouble(FullSkyline[query.rel[0].pattr]);
 			prob2 = Double.parseDouble(FullSkyline[query.rel[1].pattr+query.rel[0].numattr]);
-			if(query.p >= prob1 && query.p>=prob2)
-			{
+			int tupleNoX,tupleNoY;
+			tupleNoX = (int)Double.parseDouble(FullSkyline[query.rel[0].iattr]);
+			tupleNoY = (int)Double.parseDouble(FullSkyline[query.rel[1].iattr + query.rel[0].numattr]);
+			//if(query.p >= prob1 && query.p>=prob2)
+			//{
+				//System.out.print((int)Double.parseDouble(FullSkyline[query.rel[0].iattr])+" "+(int)Double.parseDouble(FullSkyline[query.rel[1].iattr + query.rel[0].numattr]));
 				HashMap<Integer,Double>tempMap = new HashMap<Integer,Double>();
-				tempMap.put((int)Double.parseDouble(FullSkyline[query.rel[1].iattr + query.rel[0].numattr]), prob1*prob2);
-				OutputMap.put((int)Double.parseDouble(FullSkyline[query.rel[0].iattr]), tempMap);
-			}
+				tempMap.put(tupleNoY, prob1*prob2);
+				if(OutputMap.containsKey(tupleNoX))
+					OutputMap.get(tupleNoX).putAll(tempMap);
+				else
+					OutputMap.put(tupleNoX, tempMap);
+			//}
 		}
 		br.close();
 		//End
+		
 		String result2 = agg.doAggregate(asj5,query.rel[0].gattr,gattr,query.gop);				//R2 ← Aggregate(T 5)
 		String join2=agg.doUnion(asj1,asj2,asj5);												//T ← Aggregate(T 1 ∪ T 2 ∪ T 5)
 		String target = agg.doAggregate(join2,query.rel[0].gattr,gattr,query.gop);
+		
 		int attr[]=new int[query.rel[0].nl+query.rel[1].nl+query.gop.length];
 		int pref[]=new int[query.rel[0].nl+query.rel[1].nl+query.gop.length];
 		int totalNumAttr = query.rel[0].numattr + query.rel[1].numattr;
@@ -210,7 +243,6 @@ class Pasjq
 			System.out.println("("+attr[i] +","+pref[i]+")");
 		}
 		String sky2=psk.processSkyline(query,result2,target,attr,pref,query.p,0,OutputMap);		//S2 ← ComputeSkylineUsingTargetSets(R2, T, p)
-
 		String result3 = agg.doAggregate(asj7,query.rel[0].gattr,gattr,query.gop);	//R3 ← Aggregate(T 7)
 		String join3=agg.doUnion(asj1,asj3,asj7);									//T ← Aggregate(T 1 ∪ T 3 ∪ T 7)
 		target = agg.doAggregate(join3,query.rel[0].gattr,gattr,query.gop);
@@ -218,7 +250,7 @@ class Pasjq
 
 		String join4=agg.doUnion(asj4,asj6,asj8,asj9);									//J4 ← T 4 ∪ T 6 ∪ T 8 ∪ T 9
 		String result4 = agg.doAggregate(join4,query.rel[0].gattr,gattr,query.gop); 	//R4 ← Aggregate(J4)
-		target = agg.doUnion(sky1[1],result2,result3,result4);							// T ← R1 ∪ R2 ∪ R3 ∪ R4 
+		target = agg.doUnion(sky1[1],result2,result3,result4);							// T ← R1 ∪ R2 ∪ R3 ∪ R4
 		String sky4 = psk.processSkyline(query,result4,target,attr,pref,query.p,0,OutputMap);		// S4 ← ComputeSkylineUsingTargetSets(R4, T, p)
 		String sky = agg.doUnion(sky1[0],sky2,sky3,sky4);								// S ← S1 ∪ S2 ∪ S3 ∪ S4
 		return sky;

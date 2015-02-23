@@ -108,6 +108,7 @@ public class Skyline
         FileWriter wt=new FileWriter(tempWindow);
         BufferedWriter bwt=new BufferedWriter(wt);
         Vector<String> window=new Vector<String>();
+        Vector<String>window_dom=new Vector<String>();
         String str;
         int windowLimit=100000;
 
@@ -128,33 +129,49 @@ public class Skyline
             	//Added By Chirayu
             	String temp[]=str.split(" ");
             	int tupleNo1 = (int)Double.parseDouble(temp[query.rel[0].iattr]);
+            	//int id1 = (int)Double.parseDouble(temp[query.rel[0].id]);
+            	//System.out.println(tupleNo1+" "+id1+" is being compared with");
+            	//System.out.println("tupleNo1: "+tupleNo1);
             	//End
                 int code=0;
                 for(int i=0;i<window.size();i++)
                 {
                     String record=window.elementAt(i);
+                    //System.out.println("Record"+record);
                     //Added By Chirayu
                     temp = record.split(" ");
                     int tupleNo2 = (int)Double.parseDouble(temp[query.rel[0].iattr]);
-                    
+                  //  int id2=(int)Double.parseDouble(temp[query.rel[0].id]);
+                    //System.out.println("tupleNo2: "+tupleNo2);
+                    //System.out.println(tupleNo2+" "+id2);
                     if(tupleNo1==tupleNo2)
                     	continue;
                     //End
                     code=dominates(str,record,attr,pref); // 1 : str dominates record 2: record dominates str 3: neither dominates each other
+                    //System.out.println(str+" BREAK "+record+" BREAK "+code);
                     if(code==3)
                         continue;
                     if(code==2)
                     {
                         bw[1].write(str+"\n");
+                        //Added By Chirayu
+                        window_dom.add(str);
+                        //End
                         break;
                     }
                     //System.out.println(str+" dominates "+record);
                     bw[1].write(window.elementAt(i)+"\n");
-                    window.removeElementAt(i);
-                    i--;
+                    //Added by Chirayu
+                    window_dom.add(window.elementAt(i));
+                    //Commented by Chirayu
+                    //window.removeElementAt(i);
+                    //i--;
+                    //End
                 }
-                if(code==2)
-                    continue;
+                //Commented by Chirayu
+//                if(code==2)
+//                    continue;
+                //End
                 if(window.size()==windowLimit)
                 {
                     windowFull=true;
@@ -167,11 +184,27 @@ public class Skyline
             }
             bwt.flush();
             //System.out.println(window.size()); // Skyline Size
+            	
+            //Added by Chirayu
+            for(int i=0;i<window.size();i++)
+            {
+            	for(int j=0;j<window_dom.size();j++)
+            	{
+            		if(window.elementAt(i)==window_dom.elementAt(j))
+            		{
+            			window.removeElementAt(i);
+            			i--;
+            		}
+            		
+            	}
+            }
+            //End
             for(int i=0;i<window.size();i++)
                bw[0].write(window.elementAt(i)+"\n");
             bw[0].flush();
             bw[1].flush();
             window.removeAllElements();
+            window_dom.removeAllElements();
             windowFull=false;
             if(!bufferEmpty)
             {
@@ -231,8 +264,8 @@ public class Skyline
                 strdom=false;
             j++;
         }
-   //     if(strdom&&recdom)
-    //        return 3;
+       if(strdom&&recdom)
+            return 3;
         if(strdom)
             return 1;
         else if(recdom)

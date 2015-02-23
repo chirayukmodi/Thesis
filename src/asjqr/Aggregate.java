@@ -56,7 +56,7 @@ public class Aggregate
 				rec += gattr[i]+" ";	//appending the aggregate columns at last
 
 			bw.write(rec+"\n");
-			if(flag && (record[query.rel[0].pattr] * record[query.rel[0].numattr + query.rel[1].pattr]) > query.p)  //if flag is true means thresh aggregate and next condition checks probability of joined tuple > p, else does not write to thresh file
+			if(flag && (record[query.rel[0].pattr] * record[query.rel[0].numattr + query.rel[1].pattr]) >= query.p)  //if flag is true means thresh aggregate and next condition checks probability of joined tuple > p, else does not write to thresh file
 			{
 				bwt.write(rec+" "+(record[query.rel[0].pattr] * record[query.rel[0].numattr + query.rel[1].pattr])+"\n");
 			}            	
